@@ -17,4 +17,4 @@ See [config/config.exs](config.exs).
 
 #### Services List
 
-See [priv/services.yaml](services.yaml).
+See [priv/README.services.mdl](README.services.md).
