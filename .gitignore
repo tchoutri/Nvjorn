@@ -4,3 +4,5 @@
 erl_crash.dump
 *.ez
 priv/http.yml
+priv/ssh.yml
+priv/notes.md

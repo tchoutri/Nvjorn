@@ -24,7 +24,8 @@ defmodule Nvjorn.Mixfile do
       {:httpoison, "~> 0.8.1"},
       {:poolboy, "~> 1.5"},
       {:yaml_elixir, "~> 1.0.0"},
-      {:yamerl, github: "yakaz/yamerl"}
+      {:yamerl, github: "yakaz/yamerl"},
+      {:gen_icmp, github: "msantos/gen_icmp"}
 
     ]
   end

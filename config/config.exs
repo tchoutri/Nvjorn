@@ -9,7 +9,8 @@ use Mix.Config
 # 3rd-party users, it should be done in your "mix.exs" file.
 
 config :nvjorn,
-  http: "priv/http.yml"
+  http: "priv/http.yml",
+  ssh:  "priv/ssh/yml"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

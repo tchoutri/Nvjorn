@@ -2,7 +2,7 @@
 
 A network services monitor written in Elixir using Poolboy.
 
-#### Supported services
+### Supported services
 
 - [x] HTTP
 - [ ] SSH
@@ -11,10 +11,14 @@ A network services monitor written in Elixir using Poolboy.
 - [ ] SOCKS5
 - [ ] ???
 
-#### Configuration
+### Configuration
 
 See [config.exs](config/config.exs).
 
-#### Services List
+#### Concerning `gen_icmp`
+
+Please read [this page about the icmp socket capability](https://github.com/msantos/procket#setuid-vs-sudo-vs-capabilities)
+
+### Services List
 
 See [README.services.md](priv/README.services.md).
