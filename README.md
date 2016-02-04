@@ -13,8 +13,8 @@ A network services monitor written in Elixir using Poolboy.
 
 #### Configuration
 
-See [config/config.exs](config.exs).
+See [config.exs](config/config.exs).
 
 #### Services List
 
-See [priv/README.services.md](README.services.md).
+See [README.services.md](priv/README.services.md).
