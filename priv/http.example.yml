@@ -1,0 +1,7 @@
+---
+# Put here as many 'item' fields as you want
+- item:
+    name: "Local Server"
+    host: "localhost"
+    port: 8080
+    request: "GET / HTTP/1.1"
