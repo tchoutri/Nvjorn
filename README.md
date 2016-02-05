@@ -10,9 +10,9 @@ A network services monitor written in Elixir using Poolboy.
 - [ ] SSH
     - [x] Started
     - [ ] Finished
-- [ ] ICMP
-    - [ ] Started
-    - [ ] Finished
+- [x] ICMP
+    - [x] Started
+    - [x] Finished
 - [ ] FTP
     - [ ] Started
     - [ ] Finished
