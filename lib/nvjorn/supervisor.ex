@@ -8,15 +8,24 @@ defmodule Nvjorn.Supervisor do
 
     def init([]) do
     Logger.info(IO.ANSI.green <> "Supervisor started." <> IO.ANSI.reset)
+
     http_pool = [
       name: {:local, :http_pool},
       worker_module: Nvjorn.Workers.HTTP,
       size: 50,
       max_overflow: 1
     ]
+    
+    icmp_pool = [
+      name: {:local, :icmp_pool},
+      worker_module: Nvjorn.Workers.ICMP,
+      size: 50,
+      max_overflow: 1
+    ]
 
     children = [
-      :poolboy.child_spec(:http_pool, http_pool, [])
+      :poolboy.child_spec(:http_pool, http_pool, []),
+      :poolboy.child_spec(:icmp_pool, icmp_pool, []),
     ]
 
     supervise(children, strategy: :one_for_one)

@@ -14,7 +14,7 @@ defmodule Nvjorn.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :yaml_elixir, :httpoison, :poolboy],
+    [applications: [:logger, :yaml_elixir, :httpoison, :poolboy, :ssh, :crypto],
      mod: {Nvjorn, []}]
   end
 

@@ -19,6 +19,19 @@ defmodule Nvjorn.Workers.HTTP do
       end)
   end
 
+  def handle_call({:check, %H{}=item}, _from, state) do
+    Logger.info("Monitoring #{item.name}")
+    [verb, path, _] = item.request |> String.split(" ")
+
+    result = case verb do
+      verb when verb in @verbz ->
+        {verb |> String.downcase |> String.to_atom, path, item} |> connect
+      _ ->
+        fail_miserably(:unknown_verb, verb)
+    end
+      {:reply, result, state}
+  end
+
   defp spawn_probe(%H{}=item) do
     :poolboy.transaction(
       :http_pool,
@@ -37,19 +50,6 @@ defmodule Nvjorn.Workers.HTTP do
         send(self, {:ded, item})
         send(self, {:retry, item})
     end
-  end
-
-  def handle_call({:check, %H{}=item}, _from, state) do
-    Logger.info("Monitoring #{item.name}")
-    [verb, path, _] = item.request |> String.split(" ")
-
-    result = case verb do
-      verb when verb in @verbz ->
-        {verb |> String.downcase |> String.to_atom, path, item} |> connect
-      _ ->
-        fail_miserably(:unknown_verb, verb)
-    end
-      {:reply, result, state}
   end
 
   def handle_info({:ded, %H{}=item}, state) do

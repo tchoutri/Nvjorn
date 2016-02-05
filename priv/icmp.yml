@@ -1,0 +1,10 @@
+---
+- item:
+    name: "Localhost"
+    host: "127.0.0.1"
+    inet: "inet"
+
+- item:
+    name: "Google"
+    host: "8.8.8.8"
+    inet: "inet"

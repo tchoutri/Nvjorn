@@ -5,10 +5,20 @@ A network services monitor written in Elixir using Poolboy.
 ### Supported services
 
 - [x] HTTP
+    - [x] Started
+    - [x] Finished
 - [ ] SSH
+    - [x] Started
+    - [ ] Finished
 - [ ] ICMP
+    - [ ] Started
+    - [ ] Finished
 - [ ] FTP
+    - [ ] Started
+    - [ ] Finished
 - [ ] SOCKS5
+    - [ ] Started
+    - [ ] Finished
 - [ ] ???
 
 ### Configuration

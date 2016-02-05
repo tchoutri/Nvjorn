@@ -10,7 +10,7 @@ use Mix.Config
 
 config :nvjorn,
   http: "priv/http.yml",
-  ssh:  "priv/ssh/yml"
+  icmp:  "priv/icmp.yml"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
