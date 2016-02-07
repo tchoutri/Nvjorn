@@ -8,13 +8,9 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
-config :nvjorn,
-  http: "priv/http.yml",
-  icmp:  "priv/icmp.yml"
-
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
 
-#     import_config "#{Mix.env}.exs"
+import_config "#{Mix.env}.exs"

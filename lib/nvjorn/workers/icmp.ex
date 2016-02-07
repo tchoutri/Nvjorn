@@ -3,8 +3,9 @@ defmodule Nvjorn.Workers.ICMP do
   require Logger
   alias Nvjorn.Services.ICMP, as: I
 
-  @max_retries 10
-  @interval 500
+  @max_retries Application.get_env(:nvjorn, :icmp)[:max_retries]
+  @interval Application.get_env(:nvjorn, :icmp)[:interval]
+  @ibts Application.get_env(:nvjorn, :icmp)[:interval_between_two_sequences]
 
   def start_link([]) do
     GenServer.start_link(__MODULE__, :ok, [])
@@ -43,7 +44,6 @@ defmodule Nvjorn.Workers.ICMP do
   end
 
   defp spawn_probe(%I{}=item) do
-    Logger.debug(inspect(item))
     :poolboy.transaction(
       :icmp_pool,
         fn(worker)->
@@ -60,21 +60,23 @@ defmodule Nvjorn.Workers.ICMP do
         send(self, {:retry, item})
       :ok ->
         send(self, {:alive, item})
+        send(self, {:ns, item})
     end
   end
 
   def handle_info({:ded, %I{}=item}, state) do
-    Logger.warn("Host #{item.name} (#{item.host}) not responding…")
+    Logger.warn("[ICMP] Host #{item.name} (#{item.host}) not responding…")
     {:noreply, state}
   end
 
   def handle_info({:alive, %I{}=item}, state) do
-    Logger.info("Host #{item.name} is alive!")
+    Logger.info("[ICMP] Host #{item.name} is alive!")
     {:noreply, state}
   end
 
   def handle_info({:retry, %I{failure_count: @max_retries}=item}, state) do
-    Logger.warn("We lost all contact with " <> item.name <> ". Initialising photon torpedos launch.")
+    Logger.warn("[ICMP] We lost all contact with " <> item.name <> ". Initialising photon torpedos launch.")
+    send(self, {:ns, item})
     {:noreply, state}  
   end
 
@@ -86,4 +88,12 @@ defmodule Nvjorn.Workers.ICMP do
     {:noreply, state}
   end
 
+  def handle_info({:ns, item}, state) do
+    Logger.info("[ICMP] Retrying in #{@ibts / 1000} seconds for #{item.name}")
+    :timer.sleep(@ibts)
+    spawn(fn() ->
+      spawn_probe(%{item | failure_count: 0}) 
+    end)
+    {:noreply, state}
+  end
 end

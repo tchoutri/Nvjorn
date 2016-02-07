@@ -4,8 +4,9 @@ defmodule Nvjorn.Workers.HTTP do
   alias Nvjorn.Services.HTTP, as: H
 
   @verbz ["GET", "POST", "PUT", "HEAD", "DELETE", "PATCH"]
-  @max_retries 10
-  @interval 5000
+  @max_retries Application.get_env(:nvjorn, :http)[:max_retries]
+  @interval Application.get_env(:nvjorn, :http)[:interval]
+  @ibts Application.get_env(:nvjorn, :icmp)[:interval_between_two_sequences]
 
   def start_link([]) do
     GenServer.start_link(__MODULE__, :ok, [])
@@ -20,7 +21,7 @@ defmodule Nvjorn.Workers.HTTP do
   end
 
   def handle_call({:check, %H{}=item}, _from, state) do
-    Logger.info("Monitoring #{item.name}")
+    Logger.info("[HTTP] Monitoring #{item.name}")
     [verb, path, _] = item.request |> String.split(" ")
 
     result = case verb do
@@ -44,26 +45,30 @@ defmodule Nvjorn.Workers.HTTP do
     url = "http://" <> item.host <> ":#{item.port}" <> path
     Logger.debug(item.name <> " ~> " <> url)
     case HTTPoison.request(verb, url) do
-      {:ok, result} -> 
-        send(self, {:alive, item})
-      {:error, error} ->
+      {:error, _error} ->
         send(self, {:ded, item})
         send(self, {:retry, item})
+      {:ok, _result} -> 
+        send(self, {:alive, item})
+        send(self, {:ns, item})
     end
   end
 
+  defp fail_miserably(:unknown_verb, verb), do: raise(ArgumentError, message: "Unknown HTTP verb \"#{verb}\" :-(")
+
   def handle_info({:ded, %H{}=item}, state) do
-    Logger.warn("Host #{item.name} (#{item.host}:#{item.port}) not responding…")
+    Logger.warn("[HTTP] Host #{item.name} (#{item.host}:#{item.port}) not responding…")
     {:noreply, state}
   end
 
   def handle_info({:alive, %H{}=item}, state) do
-    Logger.info("Host #{item.name} is alive!")
+    Logger.info("[HTTP] Host #{item.name} is alive!")
     {:noreply, state}
   end
 
   def handle_info({:retry, %H{failure_count: @max_retries}=item}, state) do
-    Logger.warn("We lost all contact with " <> item.name <> ". Initialising photon torpedos launch.")
+    Logger.warn("[HTTP] We lost all contact with " <> item.name <> ". Initialising photon torpedos launch.")
+    send(self, {:ns, item})
     {:noreply, state}  
   end
 
@@ -75,6 +80,12 @@ defmodule Nvjorn.Workers.HTTP do
     {:noreply, state}
   end
 
-  defp fail_miserably(:unknown_verb, verb), do: raise(ArgumentError, message: "Unknown HTTP verb \"#{verb}\" :-(")
-
+  def handle_info({:ns, item}, state) do
+    Logger.info("[HTTP] Retrying in #{@ibts / 1000} seconds for #{item.name}")
+    :timer.sleep(@ibts)
+    spawn(fn() ->
+      spawn_probe(%{item | failure_count: 0}) 
+    end)
+    {:noreply, state}
+  end
 end

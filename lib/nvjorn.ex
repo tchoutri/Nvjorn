@@ -11,7 +11,7 @@ defmodule Nvjorn do
   def monitor_icmp,  do: monitor(:icmp, ICMP, I)
 
   def monitor(conf, module, struct) do
-    targets = Application.get_env(:nvjorn, conf) |> YamlElixir.read_from_file
+    targets = Application.get_env(:nvjorn, conf)[:file] |> YamlElixir.read_from_file
     ##### HERE   BE   DRAGONS #####
     ##### SAFE ZONE ENDS HERE #####
     f_targets = Enum.concat(for item <- targets, do: Map.values(item))                # We only want to content of each "item".
