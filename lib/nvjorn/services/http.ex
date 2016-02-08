@@ -1,7 +1,7 @@
 defmodule Nvjorn.Services.HTTP do
   defstruct host: "",
             name: "",
-            port: nil,
+            port: 80,
             request: "",
             failure_count: 0
 

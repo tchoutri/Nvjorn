@@ -23,9 +23,17 @@ defmodule Nvjorn.Supervisor do
       max_overflow: 1
     ]
 
+    ftp_pool = [
+      name: {:local, :ftp_pool},
+      worker_module: Nvjorn.Workers.FTP,
+      size: 50,
+      max_overflow: 1
+    ]
+
     children = [
       :poolboy.child_spec(:http_pool, http_pool, []),
       :poolboy.child_spec(:icmp_pool, icmp_pool, []),
+      :poolboy.child_spec(:ftp_pool,  ftp_pool,  []),
     ]
 
     supervise(children, strategy: :one_for_one)

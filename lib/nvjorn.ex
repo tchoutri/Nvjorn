@@ -2,13 +2,15 @@ defmodule Nvjorn do
   use Application
   alias Nvjorn.Services.HTTP, as: H
   alias Nvjorn.Services.ICMP, as: I
+  alias Nvjorn.Services.FTP, as: F
 
   def start(_type, _args) do
     Nvjorn.Supervisor.start_link
   end
 
-  def monitor_http, do: monitor(:http, HTTP, H)
+  def monitor_http,  do: monitor(:http, HTTP, H)
   def monitor_icmp,  do: monitor(:icmp, ICMP, I)
+  def monitor_ftp,   do: monitor(:ftp,  FTP, F)
 
   def monitor(conf, module, struct) do
     targets = Application.get_env(:nvjorn, conf)[:file] |> YamlElixir.read_from_file

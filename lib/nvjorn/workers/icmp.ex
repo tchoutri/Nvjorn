@@ -28,7 +28,7 @@ defmodule Nvjorn.Workers.ICMP do
   end
 
   def handle_call({:check, %I{}=item}, _from, state) do
-    Logger.info("Monitoring #{item.name}")
+    Logger.info("[ICMP] Monitoring #{item.name}")
     if is_binary(item.host) and is_binary(item.inet) do
       s_inet = item.inet
       s_host = item.host
@@ -39,7 +39,10 @@ defmodule Nvjorn.Workers.ICMP do
         result = connect(item)
         {:reply, result, state}
       {:error, :einval} ->
-        {:stop, :shutdown, :lol, state}
+        {:stop, :shutdown, :meh, state}
+      foo ->
+        Logger.error("[ICMP] Could not catch error: #{inspect(foo)}")
+        {:stop, :shutdown, :wtf, state}
     end
   end
 
@@ -52,7 +55,7 @@ defmodule Nvjorn.Workers.ICMP do
   end
 
   defp connect(%I{}=item) do
-    Logger.debug("Connecting to " <> item.name)
+    Logger.debug("[ICMP] Connecting to " <> item.name)
     [result] = :gen_icmp.ping(item.host, [item.inet])
     case elem(result, 0) do
       :error ->
@@ -77,13 +80,13 @@ defmodule Nvjorn.Workers.ICMP do
   def handle_info({:retry, %I{failure_count: @max_retries}=item}, state) do
     Logger.warn("[ICMP] We lost all contact with " <> item.name <> ". Initialising photon torpedos launch.")
     send(self, {:ns, item})
-    {:noreply, state}  
+    {:noreply, state}
   end
 
   def handle_info({:retry, %I{failure_count: failures}=item}, state) do
     :timer.sleep(@interval)
     spawn(fn() ->
-      spawn_probe(%{item | failure_count: failures + 1}) 
+      spawn_probe(%{item | failure_count: failures + 1})
     end)
     {:noreply, state}
   end
