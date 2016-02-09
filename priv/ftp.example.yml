@@ -1,0 +1,6 @@
+---
+- item:
+    name: "Localhost"
+    host: "localhost"
+    user: anonymous
+    password: anon@nymo.us
