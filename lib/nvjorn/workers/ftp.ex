@@ -25,7 +25,7 @@ defmodule Nvjorn.Workers.FTP do
   end
 
   def handle_info({:alive, %F{}=item}, state) do
-    Logger.info("[FTP] Host #{item.name} is alive!")
+    Logger.info("[FTP] Host #{item.name} is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
     {:noreply, state}
   end
 
@@ -96,7 +96,7 @@ defmodule Nvjorn.Workers.FTP do
 
   def handle_call({:check, %F{}=item}, _from, state) do
     item = convert_struct(item)
-    Logger.info("[FTP] Monitoring " <> inspect item.name)
+    Logger.info("[FTP] Monitoring " <> List.to_string(item.name))
     case parse_host(item.host) do
       {:ok, _addr} ->
         result = connect(item)

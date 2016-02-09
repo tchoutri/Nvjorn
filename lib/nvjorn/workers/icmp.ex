@@ -73,7 +73,7 @@ defmodule Nvjorn.Workers.ICMP do
   end
 
   def handle_info({:alive, %I{}=item}, state) do
-    Logger.info("[ICMP] Host #{item.name} is alive!")
+    Logger.info("[ICMP] Host #{item.name} is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
     {:noreply, state}
   end
 
