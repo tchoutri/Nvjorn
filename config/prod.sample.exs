@@ -1,8 +1,9 @@
 use Mix.Config
 
 config :logger, :console,
-  format: "$time ($node)$metadata[$level] $message\n",
-  metadata: [:request_id]
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id],
+  level: :info
 
 config :nvjorn,
   http: [file: "priv/http.yml",

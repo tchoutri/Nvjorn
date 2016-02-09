@@ -8,10 +8,4 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
-config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id],
-  level: :info
-
-
 import_config "#{Mix.env}.exs"
