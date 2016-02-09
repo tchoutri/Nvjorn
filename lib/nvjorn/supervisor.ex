@@ -33,7 +33,7 @@ defmodule Nvjorn.Supervisor do
     children = [
       :poolboy.child_spec(:http_pool, http_pool, []),
       :poolboy.child_spec(:icmp_pool, icmp_pool, []),
-      :poolboy.child_spec(:ftp_pool,  ftp_pool,  []),
+     :poolboy.child_spec(:ftp_pool,  ftp_pool,  []),
     ]
 
     supervise(children, strategy: :one_for_one)

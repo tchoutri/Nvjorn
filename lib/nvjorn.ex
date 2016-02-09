@@ -8,6 +8,12 @@ defmodule Nvjorn do
     Nvjorn.Supervisor.start_link
   end
 
+  def all_monitors do
+    monitor_http
+    monitor_icmp
+    monitor_ftp
+  end
+
   def monitor_http,  do: monitor(:http, HTTP, H)
   def monitor_icmp,  do: monitor(:icmp, ICMP, I)
   def monitor_ftp,   do: monitor(:ftp,  FTP, F)

@@ -15,7 +15,7 @@ A network services monitor written in Elixir using Poolboy.
     - [x] Finished
 - [ ] FTP
     - [x] Started
-    - [ ] Finished
+    - [x] Finished
 - [ ] SOCKS5
     - [ ] Started
     - [ ] Finished
