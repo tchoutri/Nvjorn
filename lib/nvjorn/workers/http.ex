@@ -42,7 +42,13 @@ defmodule Nvjorn.Workers.HTTP do
   end
 
   defp connect({verb, path, %H{}=item}) do
-    url = "http://" <> item.host <> ":#{item.port}" <> path
+    Logger.debug(inspect item)
+    prefix = if item.ssl == "true" do
+      "https://"
+    else
+      "http://"
+    end
+    url = prefix <> item.host <> ":#{item.port}" <> path
     Logger.debug(item.name <> " ~> " <> url)
     case HTTPoison.request(verb, url) do
       {:error, _error} ->
