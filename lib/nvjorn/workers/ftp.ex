@@ -25,12 +25,12 @@ defmodule Nvjorn.Workers.FTP do
   end
 
   def handle_info({:alive, %F{}=item}, state) do
-    Logger.info("[FTP] Host #{item.name} is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
+    Logger.info("[FTP] Host " <> IO.ANSI.cyan  <> inspect(item.name) <> IO.ANSI.reset <> " is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
     {:noreply, state}
   end
 
   def handle_info({:retry, %F{failure_count: @max_retries}=item}, state) do
-    Logger.warn("[FTP] We lost all contact with " <> item.name <> ". Initialising photon torpedos launch.")
+    Logger.warn("[FTP] We lost all contact with " <> inspect(item.name) <> ". Initialising photon torpedos launch.")
     send(self, {:ns, item})
     {:noreply, state}
   end
@@ -103,7 +103,7 @@ defmodule Nvjorn.Workers.FTP do
         {:reply, result, state}
       {:error, reason} ->
         Logger.error("[FTP] " <> reason)
-        {:stop, :shutdown, :wtf, state}
+        {:stop, :shutdown, :meh, state}
     end
   end
 

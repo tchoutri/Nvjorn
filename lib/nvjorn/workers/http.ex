@@ -68,7 +68,7 @@ defmodule Nvjorn.Workers.HTTP do
   end
 
   def handle_info({:alive, %H{}=item}, state) do
-    Logger.info("[HTTP] Host #{item.name} is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
+    Logger.info("[HTTP] Host " <> IO.ANSI.cyan  <> item.name <> IO.ANSI.reset <> " is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
     {:noreply, state}
   end
 
