@@ -35,21 +35,6 @@ defmodule Nvjorn.Workers.ICMP do
     s
   end
 
-  def handle_call({:check, %I{}=item}, _from, state) do
-    item = convert_struct(item)
-    Logger.info("[ICMP] Monitoring #{item.name}")
-    case parse_host(item.host) do
-      {:ok, _addr} ->
-        result = connect(item)
-        {:reply, result, state}
-      {:error, reason} ->
-        Logger.error("[ICMP] " <> reason)
-        {:stop, :shutdown, :meh, state}
-      foo ->
-        Logger.error("[ICMP] Could not catch error: #{inspect foo} for #{inspect item.name}")
-        {:stop, :shutdown, :wtf, state}
-    end
-  end
 
   defp spawn_probe(%I{}=item) do
     :poolboy.transaction(
@@ -61,20 +46,44 @@ defmodule Nvjorn.Workers.ICMP do
 
   def multi_connect(%I{}=item) do
     Enum.each(10..0,
-      fn(n) -> connect(item)
+      fn -> connect(item)
     end)
   end
+
+  def handle_call({:check, %I{}=item}, _from, state) do
+    item = convert_struct(item)
+    Logger.info("[ICMP] Monitoring #{item.name}")
+    case parse_host(item.host) do
+      {:ok, _addr} ->
+        result = connect(item)
+        {:reply, result, state}
+      {:error, reason} ->
+        Logger.error("[ICMP] " <> reason)
+        send(self, {:ded, item})
+        send(self, {:retry, item})
+        {:stop, :shutdown, :meh, state}
+      foo ->
+        Logger.error("[ICMP] Could not catch error: #{inspect foo} for #{inspect item.name}")
+        {:stop, :shutdown, :wtf, state}
+    end
+  end
+
   def connect(%I{}=item) do
     Logger.debug("[ICMP] Connecting to " <> inspect item.name)
-    [result] = :gen_icmp.ping(item.host, [item.inet])
+    result = :gen_icmp.ping(item.host, [List.to_atom(item.inet)])
     Logger.debug(inspect(result))
-    case elem(result, 0) do
+    case Enum.at(result, 0) |> elem(0) do
       :error ->
         send(self, {:ded, item})
         send(self, {:retry, item})
+        :error
       :ok ->
         send(self, {:alive, item})
         send(self, {:ns, item})
+        :ok
+      foo ->
+        Logger.error(inspect foo)
+        :error
     end
   end
 
@@ -111,32 +120,25 @@ defmodule Nvjorn.Workers.ICMP do
     {:noreply, state}
   end
 
-  @spec parse_host(tuple()) :: {:ok, tuple()} | {:error, term()}
-  @spec parse_host(list()) :: {:ok, tuple()} | {:error, term()}
-
-  defp parse_host(host) when is_tuple(host) do
+  defp parse_host(host) do
     Logger.debug("[ICMP] Host is " <> inspect(host))
     case :inet.parse_address(host) do
-      {:ok, ip} ->
-        {:ok, ip}
-      _         -> 
-        {:error, "Could not parse “host” field."}
+      {:ok, _ip} ->
+        {:ok, host}
+      {:error, :einval} ->
+        parse_host(:hostname, host)
     end
   end
 
-  defp parse_host(host) when is_binary(host) do
-    parse_host(String.to_charlist(host))
-  end
-
-  defp parse_host(host) when is_list(host) do
+  defp parse_host(:hostname, host) do
     Logger.debug("[ICMP] Host is " <> inspect(host))
     case :inet.getaddr(host, :inet) do
-      {:ok, ip} ->
-        {:ok, ip}
+      {:ok, _ip} ->
+        {:ok, host}
       {:error, :eafnosupport} ->
         :inet.getaddr(host, :inet6)
-      _ ->
-        {:error, "Could not parse “host” field."}
+      {:error, _} ->
+        {:ok, host}
     end
   end
 end

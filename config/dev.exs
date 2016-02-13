@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :logger, :console,
-  format: "$time ($node)$metadata[$level] $message\n",
+  format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
 config :nvjorn,
