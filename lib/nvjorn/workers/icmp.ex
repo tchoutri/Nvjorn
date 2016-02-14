@@ -70,10 +70,11 @@ defmodule Nvjorn.Workers.ICMP do
 
   def connect(%I{}=item) do
     Logger.debug("[ICMP] Connecting to " <> inspect item.name)
-    result = :gen_icmp.ping(item.host, [List.to_atom(item.inet)])
+    [result] = :gen_icmp.ping(item.host, [List.to_atom(item.inet)])
     Logger.debug(inspect(result))
-    case Enum.at(result, 0) |> elem(0) do
+    case elem(result, 0) do
       :error ->
+        Logger.warn(inspect(result))
         send(self, {:ded, item})
         send(self, {:retry, item})
         :error
