@@ -27,7 +27,7 @@ defmodule Nvjorn do
            for {key, val} <- string_map, into: %{}, do: {String.to_atom(key), val}    # Now, we turn those string-based keys into atom-based keys,
          end)                                                                         # so they fit in the Struct.
       |> Enum.map(fn(map) -> struct(struct, map) end)                                      # We translate all those new maps into structs,
-    worker = Module.concat(Nvjorn.Workers, module)
+    worker = Module.concat(Nvjorn.Worker, module)
     worker.dispatch(f_targets)                                                        # that we can happily send to our worker.
   end
   # Just so you know, the original one-liner looks like:
