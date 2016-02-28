@@ -1,4 +1,4 @@
-defmodule Nvjorn.Workers.HTTP do
+defmodule Nvjorn.Worker.HTTP do
   use GenServer
   require Logger
   alias Nvjorn.Services.HTTP, as: H
@@ -7,6 +7,8 @@ defmodule Nvjorn.Workers.HTTP do
   @max_retries Application.get_env(:nvjorn, :http)[:max_retries]
   @interval Application.get_env(:nvjorn, :http)[:interval]
   @ibts Application.get_env(:nvjorn, :icmp)[:interval_between_two_sequences]
+
+  @behaviour Worker
 
   def start_link([]) do
     GenServer.start_link(__MODULE__, :ok, [])
@@ -18,19 +20,6 @@ defmodule Nvjorn.Workers.HTTP do
       fn(item) ->
         spawn(fn() -> spawn_probe(item) end)
       end)
-  end
-
-  def handle_call({:check, %H{}=item}, _from, state) do
-    Logger.info("[HTTP] Monitoring #{item.name}")
-    [verb, path, _] = item.request |> String.split(" ")
-
-    result = case verb do
-      verb when verb in @verbz ->
-        {verb |> String.downcase |> String.to_atom, path, item} |> connect
-      _ ->
-        fail_miserably(:unknown_verb, verb)
-    end
-      {:reply, result, state}
   end
 
   defp spawn_probe(%H{}=item) do
@@ -61,6 +50,19 @@ defmodule Nvjorn.Workers.HTTP do
   end
 
   defp fail_miserably(:unknown_verb, verb), do: raise(ArgumentError, message: "Unknown HTTP verb \"#{verb}\" :-(")
+
+  def handle_call({:check, %H{}=item}, _from, state) do
+    Logger.info("[HTTP] Monitoring #{item.name}")
+    [verb, path, _] = item.request |> String.split(" ")
+
+    result = case verb do
+      verb when verb in @verbz ->
+        {verb |> String.downcase |> String.to_atom, path, item} |> connect
+      _ ->
+        fail_miserably(:unknown_verb, verb)
+    end
+      {:reply, result, state}
+  end
 
   def handle_info({:ded, %H{}=item}, state) do
     Logger.warn("[HTTP] Host #{item.name} (#{item.host}:#{item.port}) not responding…")

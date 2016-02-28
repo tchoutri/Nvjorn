@@ -1,4 +1,4 @@
-defmodule Nvjorn.Workers.FTP do
+defmodule Nvjorn.Worker.FTP do
   use GenServer
   require Logger
   alias Nvjorn.Services.FTP, as: F
@@ -19,38 +19,6 @@ defmodule Nvjorn.Workers.FTP do
       end)
   end
 
-  def handle_info({:ded, %F{}=item}, state) do
-      Logger.warn("[FTP] Host #{item.name} (#{item.host}) not responding…")
-      {:noreply, state}
-  end
-
-  def handle_info({:alive, %F{}=item}, state) do
-    Logger.info("[FTP] Host " <> IO.ANSI.cyan  <> inspect(item.name) <> IO.ANSI.reset <> " is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
-    {:noreply, state}
-  end
-
-  def handle_info({:retry, %F{failure_count: @max_retries}=item}, state) do
-    Logger.warn("[FTP] We lost all contact with " <> inspect(item.name) <> ". Initialising photon torpedos launch.")
-    send(self, {:ns, item})
-    {:noreply, state}
-  end
-
-  def handle_info({:retry, %F{failure_count: failures}=item}, state) do
-    :timer.sleep(@interval)
-    spawn(fn() ->
-      spawn_probe(%{item | failure_count: failures + 1}) 
-    end)
-    {:noreply, state}
-  end
-
-  def handle_info({:ns, item}, state) do
-    Logger.info("[FTP] Retrying in #{@ibts / 1000} seconds for " <> inspect item.name)
-    :timer.sleep(@ibts)
-    spawn(fn() ->
-      spawn_probe(%{item | failure_count: 0})
-    end)
-    {:noreply, state}
-  end
 
   def spawn_probe(%F{}=item) do
     :poolboy.transaction(
@@ -79,19 +47,25 @@ defmodule Nvjorn.Workers.FTP do
 
   def connect(%F{}=item) do
     Logger.debug("[FTP] Connecting to " <> inspect item.name)
-    {:ok, pid} = :ftp.open(item.host, [{:port, item.port}])
-
-    case :ftp.user(pid, item.user, item.password)  do
-      {:error, reason} ->
-        Logger.error(inspect reason)
-        send(self, {:ded, item})
-        send(self, {:retry, item})
-      :ok ->
-        Logger.debug "[FTP] Connected!"
-        send(self, {:alive, item})
-        send(self, {:ns, item})
-    end
+    case :ftp.open(item.host, [{:port, item.port}]) do
+    {:error, error} ->
+      Logger.error(inspect(error))
+      send(self, {:ded, item})
+      send(self, {:retry, item})
+      :error
+    {:ok, pid} ->
+      case :ftp.user(pid, item.user, item.password)  do
+        {:error, reason} ->
+          Logger.error(inspect reason)
+          send(self, {:ded, item})
+          send(self, {:retry, item})
+        :ok ->
+          Logger.debug "[FTP] Connected!"
+          send(self, {:alive, item})
+         send(self, {:ns, item})
+      end
     :ftp.close(pid)
+    end
   end
 
   def handle_call({:check, %F{}=item}, _from, state) do
@@ -133,5 +107,38 @@ defmodule Nvjorn.Workers.FTP do
       _ ->
         {:error, "Could not parse “host” field."}
     end
+  end
+
+  def handle_info({:ded, %F{}=item}, state) do
+      Logger.warn("[FTP] Host #{item.name} (#{item.host}) not responding…")
+      {:noreply, state}
+  end
+
+  def handle_info({:alive, %F{}=item}, state) do
+    Logger.info("[FTP] Host " <> IO.ANSI.cyan  <> inspect(item.name) <> IO.ANSI.reset <> " is alive! " <> IO.ANSI.magenta <> "( ◕‿◕)" <> IO.ANSI.reset)
+    {:noreply, state}
+  end
+
+  def handle_info({:retry, %F{failure_count: @max_retries}=item}, state) do
+    Logger.warn("[FTP] We lost all contact with " <> inspect(item.name) <> ". Initialising photon torpedos launch.")
+    send(self, {:ns, item})
+    {:noreply, state}
+  end
+
+  def handle_info({:retry, %F{failure_count: failures}=item}, state) do
+    :timer.sleep(@interval)
+    spawn(fn() ->
+      spawn_probe(%{item | failure_count: failures + 1}) 
+    end)
+    {:noreply, state}
+  end
+
+  def handle_info({:ns, item}, state) do
+    Logger.info("[FTP] Retrying in #{@ibts / 1000} seconds for " <> inspect item.name)
+    :timer.sleep(@ibts)
+    spawn(fn() ->
+      spawn_probe(%{item | failure_count: 0})
+    end)
+    {:noreply, state}
   end
 end

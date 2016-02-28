@@ -11,21 +11,21 @@ defmodule Nvjorn.Supervisor do
 
     http_pool = [
       name: {:local, :http_pool},
-      worker_module: Nvjorn.Workers.HTTP,
+      worker_module: Nvjorn.Worker.HTTP,
       size: 50,
       max_overflow: 1
     ]
     
     icmp_pool = [
       name: {:local, :icmp_pool},
-      worker_module: Nvjorn.Workers.ICMP,
+      worker_module: Nvjorn.Worker.ICMP,
       size: 50,
       max_overflow: 1
     ]
 
     ftp_pool = [
       name: {:local, :ftp_pool},
-      worker_module: Nvjorn.Workers.FTP,
+      worker_module: Nvjorn.Worker.FTP,
       size: 50,
       max_overflow: 1
     ]
