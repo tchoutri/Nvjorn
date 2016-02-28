@@ -13,7 +13,7 @@ A network services monitor written in Elixir using Poolboy.
 - [x] ICMP
     - [x] Started
     - [x] Finished
-- [ ] FTP
+- [x] FTP
     - [x] Started
     - [x] Finished
 - [ ] SOCKS5
