@@ -3,12 +3,16 @@ defmodule Nvjorn do
   alias Nvjorn.Services.HTTP, as: H
   alias Nvjorn.Services.ICMP, as: I
   alias Nvjorn.Services.FTP, as: F
+  require Logger
 
   def start(_type, _args) do
+    spawn(fn -> all_monitors end)
     Nvjorn.Supervisor.start_link
   end
 
   def all_monitors do
+    Logger.info(IO.ANSI.green <> "Initializing" <> IO.ANSI.reset)
+    :timer.sleep(2500) # Dirty Trick to wait for the supervisor to start everything
     monitor_http
     monitor_icmp
     monitor_ftp
