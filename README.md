@@ -32,3 +32,9 @@ Please read [this page about the icmp socket capability](https://github.com/msan
 ### Services List
 
 See [README.services.md](priv/README.services.md).
+
+### Running it
+
+```Shell
+mix run --sname nvjorn --no-halt
+```
