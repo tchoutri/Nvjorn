@@ -49,14 +49,14 @@ defmodule Nvjorn.Worker.FTP do
     Logger.debug("[FTP] Connecting to " <> inspect item.name)
     case :ftp.open(item.host, [{:port, item.port}]) do
     {:error, error} ->
-      Logger.error(inspect(error))
+      Logger.error("[FTP] " <> inspect(error))
       send(self, {:ded, item})
       send(self, {:retry, item})
       :error
     {:ok, pid} ->
       case :ftp.user(pid, item.user, item.password)  do
         {:error, reason} ->
-          Logger.error(inspect reason)
+          Logger.error("[FTP] " <> inspect reason)
           send(self, {:ded, item})
           send(self, {:retry, item})
         :ok ->

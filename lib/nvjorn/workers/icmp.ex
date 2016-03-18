@@ -58,7 +58,7 @@ defmodule Nvjorn.Worker.ICMP do
     Logger.debug(inspect(result))
     case elem(result, 0) do
       :error ->
-        Logger.warn(inspect(result))
+        Logger.warn("[ICMP] " <> inspect(result))
         send(self, {:ded, item})
         send(self, {:retry, item})
         :error
@@ -67,7 +67,7 @@ defmodule Nvjorn.Worker.ICMP do
         send(self, {:ns, item})
         :ok
       foo ->
-        Logger.error(inspect foo)
+        Logger.error("[ICMP] " <> inspect foo)
         :error
     end
   end
