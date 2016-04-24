@@ -53,7 +53,7 @@ defmodule Nvjorn.Worker.HTTP do
 
   def handle_call({:check, %H{}=item}, _from, state) do
     Logger.info("[HTTP] Monitoring #{item.name}")
-    [verb, path, _] = item.request |> String.split(" ")
+    [verb, path, _] = ~w/#{item.request}/
 
     result = case verb do
       verb when verb in @verbz ->
