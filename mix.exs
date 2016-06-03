@@ -21,9 +21,9 @@ defmodule Nvjorn.Mixfile do
   defp deps do
     [
       {:socket, "~> 0.3"},
-      {:httpoison, "~> 0.8.1"},
+      {:httpoison, "~> 0.8"},
       {:poolboy, "~> 1.5"},
-      {:yaml_elixir, "~> 1.0.0"},
+      {:yaml_elixir, "~> 1.2"},
       {:yamerl, github: "yakaz/yamerl"},
       {:gen_icmp, github: "msantos/gen_icmp"}
 

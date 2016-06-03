@@ -1,4 +1,4 @@
-# Nvjorn
+# Nvjorn [![Deps Status](https://beta.hexfaktor.org/badge/all/github/tchoutri/Nvjorn.svg)](https://beta.hexfaktor.org/github/tchoutri/Nvjorn)
 
 A network services monitor written in Elixir using Poolboy.
 
