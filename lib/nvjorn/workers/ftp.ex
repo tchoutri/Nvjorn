@@ -40,31 +40,21 @@ defmodule Nvjorn.Worker.FTP do
       end
     end
     map = Enum.zip(keys, values) |> Enum.into(%{})
-    s   = struct(%F{}, map)
-    Logger.debug("Transformed struct => " <> inspect s)
-    s
+    struct(%F{}, map)
   end
 
   def connect(%F{}=item) do
-    Logger.debug("[FTP] Connecting to " <> inspect item.name)
-    case :ftp.open(item.host, [{:port, item.port}]) do
-    {:error, error} ->
-      Logger.error("[FTP] " <> inspect(error))
-      send(self, {:ded, item})
-      send(self, {:retry, item})
-      :error
-    {:ok, pid} ->
-      case :ftp.user(pid, item.user, item.password)  do
+    Logger.debug "[FTP] Connecting to " <> inspect item.name
+    with {:ok, pid} <- :ftp.open(item.host, [{:port, item.port}]),
+          :ok       <- :ftp.user(pid, item.user, item.password) do
+            Logger.debug "[FTP] Connected to " <> inspect item.name
+            send(self, {:alive, item})
+            send(self, {:ns, item})
+    else
         {:error, reason} ->
           Logger.error("[FTP] " <> inspect reason)
           send(self, {:ded, item})
           send(self, {:retry, item})
-        :ok ->
-          Logger.debug "[FTP] Connected!"
-          send(self, {:alive, item})
-         send(self, {:ns, item})
-      end
-    :ftp.close(pid)
     end
   end
 
@@ -82,7 +72,7 @@ defmodule Nvjorn.Worker.FTP do
   end
 
   # Get the term. Try to parse the address. If you can't,
-  # Check if it's a hostname and try to get an IP address out of it.
+  # check if it's a hostname and try to get an IP address out of it.
   # If you really can't do anything with it, stop the procedure.
 
   @spec parse_host(tuple()) :: {:ok, tuple()} | {:error, term()}

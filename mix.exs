@@ -14,7 +14,7 @@ defmodule Nvjorn.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :yaml_elixir, :httpoison, :poolboy, :ssh, :crypto],
+    [applications: [:logger, :yaml_elixir, :httpoison, :poolboy, :ssh, :crypto, :gproc],
      mod: {Nvjorn, []}]
   end
 
@@ -25,7 +25,8 @@ defmodule Nvjorn.Mixfile do
       {:poolboy, "~> 1.5"},
       {:yaml_elixir, "~> 1.2"},
       {:yamerl, github: "yakaz/yamerl"},
-      {:gen_icmp, github: "msantos/gen_icmp"}
+      {:gen_icmp, github: "msantos/gen_icmp"},
+      {:gproc, "~> 0.5"},
 
     ]
   end

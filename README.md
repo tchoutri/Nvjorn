@@ -29,6 +29,8 @@ See [config.exs](config/config.exs).
 
 Please read [this page about the icmp socket capability](https://github.com/msantos/procket#setuid-vs-sudo-vs-capabilities)
 
+(TL;DR → `setcap cap_net_raw=ep /usr/lib/erlang/erts-8.0/bin/beam.smp` [or whatever is your `erts` version] as root or using `sudo`)
+
 ### Services List
 
 See [README.services.md](priv/README.services.md).

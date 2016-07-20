@@ -1,8 +1,10 @@
 defmodule Nvjorn do
   use Application
+
   alias Nvjorn.Services.HTTP, as: H
   alias Nvjorn.Services.ICMP, as: I
-  alias Nvjorn.Services.FTP, as: F
+  alias Nvjorn.Services.FTP,  as: F
+
   require Logger
 
   def start(_type, _args) do
@@ -12,7 +14,9 @@ defmodule Nvjorn do
 
   def all_monitors do
     Logger.info(IO.ANSI.green <> "Initializing" <> IO.ANSI.reset)
-    :timer.sleep(2500) # Dirty Trick to wait for the supervisor to start everything
+    #:timer.sleep(2500) # Dirty Trick to wait for the supervisor to start everything
+    :gproc.await({:n, :l, Nvjorn.Supervisor})
+    Logger.info(IO.ANSI.green <> "Starting Probes" <> IO.ANSI.reset)
     monitor_http
     monitor_icmp
     monitor_ftp
@@ -34,7 +38,4 @@ defmodule Nvjorn do
     worker = Module.concat(Nvjorn.Worker, module)
     worker.dispatch(f_targets)                                                        # that we can happily send to our worker.
   end
-  # Just so you know, the original one-liner looks like:
-  #  f_targets = Enum.concat(for item <- targets, do: Map.values(item)) |> Enum.map(fn(string_map) -> for {key, val} <- string_map, into: %{}, do: {String.to_atom(key), val} end) |> Enum.map(fn(map) -> struct(H, map) end)
-  # Don't thank me.
 end

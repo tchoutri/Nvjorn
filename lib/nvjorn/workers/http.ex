@@ -31,7 +31,6 @@ defmodule Nvjorn.Worker.HTTP do
   end
 
   defp connect({verb, path, %H{}=item}) do
-    Logger.debug(inspect item)
     prefix = if item.ssl == "true" do
       "https://"
     else
@@ -48,8 +47,6 @@ defmodule Nvjorn.Worker.HTTP do
         send(self, {:ns, item})
     end
   end
-
-  defp fail_miserably(:unknown_verb, verb), do: raise(ArgumentError, message: "Unknown HTTP verb \"#{verb}\" :-(")
 
   def handle_call({:check, %H{}=item}, _from, state) do
     Logger.info("[HTTP] Monitoring #{item.name}")
@@ -96,4 +93,6 @@ defmodule Nvjorn.Worker.HTTP do
     end)
     {:noreply, state}
   end
+
+  defp fail_miserably(:unknown_verb, verb), do: raise(ArgumentError, message: "Unknown HTTP verb \"#{verb}\" :-(")
 end

@@ -36,6 +36,8 @@ defmodule Nvjorn.Supervisor do
      :poolboy.child_spec(:ftp_pool,  ftp_pool,  []),
     ]
 
-    supervise(children, strategy: :one_for_one)
+    result = supervise(children, strategy: :one_for_one)
+    :gproc.reg({:n, :l, __MODULE__}, :ignored)
+    result
   end
 end

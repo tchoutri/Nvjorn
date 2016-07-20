@@ -21,6 +21,7 @@ defmodule Nvjorn.Worker.ICMP do
       end)
   end
 
+  @spec convert_struct(map()) :: %I{} 
   def convert_struct(item) do
     [_|keys] = Map.keys(item)
     [_|values] =
@@ -32,9 +33,7 @@ defmodule Nvjorn.Worker.ICMP do
       end
     end
     map = Enum.zip(keys, values) |> Enum.into(%{})
-    s   = struct(%I{}, map)
-    Logger.debug("Transformed struct => " <> inspect s)
-    s
+    struct(%I{}, map)
   end
 
 
@@ -55,7 +54,6 @@ defmodule Nvjorn.Worker.ICMP do
   def connect(%I{}=item) do
     Logger.debug("[ICMP] Connecting to " <> inspect item.name)
     [result] = :gen_icmp.ping(item.host, [List.to_atom(item.inet)])
-    Logger.debug(inspect(result))
     case elem(result, 0) do
       :error ->
         Logger.warn("[ICMP] " <> inspect(result))
@@ -66,8 +64,8 @@ defmodule Nvjorn.Worker.ICMP do
         send(self, {:alive, item})
         send(self, {:ns, item})
         :ok
-      foo ->
-        Logger.error("[ICMP] " <> inspect foo)
+      err ->
+        Logger.error("[ICMP] " <> inspect err)
         :error
     end
   end
@@ -89,7 +87,8 @@ defmodule Nvjorn.Worker.ICMP do
         {:ok, host}
       {:error, :eafnosupport} ->
         :inet.getaddr(host, :inet6)
-      {:error, _} ->
+      {:error, err} ->
+        Logging.error "[ICMP] ~> " <> inspect err
         {:ok, host}
     end
   end
